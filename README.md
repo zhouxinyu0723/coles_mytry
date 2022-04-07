@@ -1,5 +1,8 @@
 ##  Contrastive Laplacian Eigenmaps (COLES) 
 
+### this is cloned from https://github.com/allenhaozhu/COLES.git which is the code for the paper written by Hao Zhu, Ke Sun, Piotr Koniusz
+I ,as a reader, tried to implement the coles_gcn training in the file Untitled.ipynb and Untitled1.ipynb. The model in Untitled.ipynb was created guided by the paper. The model in Untitled1.ipynb is from orginial code, with a loss function which I do not quite understand.
+
 ### Overview
 This repo contains an example implementation of the Neurips 2021 paper: Contrastive Laplacian Eigenmaps.
 This code is based on SSGC (Simple Spectral Graph Convolution).
