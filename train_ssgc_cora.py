@@ -35,16 +35,6 @@ torch.manual_seed(args.seed)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 feature, adj_normalized, lap_normalized= load_dataset_adj_lap(args.dataset)
-'''restart_ratio = 1/2
-lap_normalized_power1 = lap_normalized
-lap_normalized_power2 = (1-restart_ratio)*torch.mm(lap_normalized,lap_normalized_power1) + restart_ratio*lap_normalized_power1 
-lap_normalized_power3 = (1-restart_ratio)*torch.mm(lap_normalized,lap_normalized_power2.float()) + restart_ratio*lap_normalized_power1
-lap_normalized_power4 = (1-restart_ratio)*torch.mm(lap_normalized,lap_normalized_power3.float()) + restart_ratio*lap_normalized_power1
-lap_normalized_power5 = (1-restart_ratio)*torch.mm(lap_normalized,lap_normalized_power4.float()) + restart_ratio*lap_normalized_power1
-lap_normalized_power = lap_normalized_power3# + (lap_normalized_power2 * ~lap_normalized_power1.bool()).float() + (lap_normalized_power3* ~lap_normalized_power2.bool()).float() + (lap_normalized_power4* ~lap_normalized_power3.bool()).float() + (lap_normalized_power5* ~lap_normalized_power4.bool()).float()
-lap_normalized_power = lap_normalized_power/torch.sum(lap_normalized_power,1)'''
-lap_normalized_power2 = torch.matrix_power(adj_normalized,100)
-
 feature = feature.to(device)
 adj_normalized = adj_normalized.to(device)
 lap_normalized = lap_normalized.to(device)
@@ -64,11 +54,11 @@ for epoch in range(args.epochs):
 
     optimizer.zero_grad()
     out = model(emb)
-    
-    loss = (Lambda*torch.trace(torch.mm(torch.mm(torch.transpose(out, 0, 1), neg_sample), out)) - torch.trace(
-        torch.mm(torch.mm(torch.transpose(out, 0, 1), lap_normalized_power2), out)))/out.shape[0]
 
-    #print(loss)
+    loss = (Lambda*torch.trace(torch.mm(torch.mm(torch.transpose(out, 0, 1), neg_sample), out)) - torch.trace(
+        torch.mm(torch.mm(torch.transpose(out, 0, 1), lap_normalized), out)))/out.shape[0]
+
+    print(loss)
     loss.backward()
     optimizer.step()
 

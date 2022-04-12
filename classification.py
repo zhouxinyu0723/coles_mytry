@@ -7,6 +7,7 @@ from sklearn.metrics.pairwise import euclidean_distances
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.preprocessing import normalize
 import scipy.sparse as sp
+import torch
 
 def run_regression(train_embeds, train_labels, test_embeds, test_labels):
     from sklearn.linear_model import LogisticRegression
@@ -18,7 +19,7 @@ def run_regression(train_embeds, train_labels, test_embeds, test_labels):
     #print("Test Accuracy:", accuracy)
     return accuracy
 
-def classify(embeds, dataset, per_class):
+def classify(embeds, dataset, per_class,weight=None):
 
     label_file = open("data/{}{}".format(dataset,"_labels.txt"), 'r')
     label_text = label_file.readlines()
@@ -38,15 +39,31 @@ def classify(embeds, dataset, per_class):
     ave = []
     for k in range(50):
         train_ids = eval(train_text[k])
+        
+        if weight == None:
+            train_labels = [labels[i] for i in train_ids]
+            train_embeds = embeds[[id for id in train_ids]]
+            
+        else:
+            train_labels = []
+            train_embeds = torch.zeros(0,embeds.shape[1])
+            for i in train_ids:
+                for j in range(weight[i,0].item()):
+                    train_labels.append(labels[i])
+                    train_embeds = torch.vstack((train_embeds,embeds[i,:]))
+                    #print(train_embeds.shape)  
+                
+
+
         test_ids = eval(test_text[k])
-        train_labels = [labels[i] for i in train_ids]
         test_labels = [labels[i] for i in test_ids]
-        train_embeds = embeds[[id for id in train_ids]]
         test_embeds = embeds[[id for id in test_ids]]
         acc = run_regression(train_embeds, train_labels, test_embeds, test_labels)
         ave.append(acc)
     print(np.mean(ave)*100)
     print(np.std(ave)*100)
+
+
 
 
 def clustering(embeds, dataset):
